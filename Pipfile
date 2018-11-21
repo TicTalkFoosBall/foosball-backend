@@ -10,6 +10,7 @@ pylint = "*"
 flask = "*"
 python-dotenv = "*"
 uwsgi = "*"
+redis = "*"
 
 [requires]
 python_version = "3.7"
