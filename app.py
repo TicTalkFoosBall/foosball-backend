@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response, redirect, url_for
 from jinja2 import escape
 from account import Account
 
@@ -26,11 +26,22 @@ def testGet():
     """
     ex: http://localhost:5000/get?name=ice
     """
+    # name = escape(request.args.get('name'))
     name = request.args.get('name')
+    if name is None:
+        name = request.cookies.get('account')
     if name:
-        return 'name = {}'.format(escape(request.args.get('name')))
+        return 'name = {}'.format(escape(name))
     else:
         return jsonify(msg='name为空', code='404'), 404
+
+
+@app.route('/cookie')
+def testCookie():
+    # response = make_response(redirect(url_for('index')))
+    response = make_response()
+    response.set_cookie('account', 'ice')
+    return response
 
 
 @app.route('/account/register/<string:accountnumber>/<string:password>')
