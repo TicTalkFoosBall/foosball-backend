@@ -1,6 +1,7 @@
-from flask import Flask, request, jsonify, make_response, redirect, url_for
+from flask import Flask, request, jsonify, make_response, session
 from jinja2 import escape
 from account import Account
+import os
 
 
 def after_request(response):
@@ -11,6 +12,8 @@ def after_request(response):
 
 
 app = Flask(__name__)
+app.secret_key = os.getenv('SECRET_KEY')
+app.session_cookie_name = 'encryptCookie'
 app.after_request(after_request)
 accountManager = Account()
 
@@ -38,9 +41,15 @@ def testGet():
 
 @app.route('/cookie')
 def testCookie():
+    # 未加密
     # response = make_response(redirect(url_for('index')))
     response = make_response()
     response.set_cookie('account', 'ice')
+
+    # 加密
+    session['encryptAccount'] = 'encryptIce'
+    # session.pop('encryptAccount')
+    # abort(403)
     return response
 
 
