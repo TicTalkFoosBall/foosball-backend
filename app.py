@@ -1,6 +1,6 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
+from jinja2 import escape
 from account import Account
-import json
 
 
 def after_request(response):
@@ -28,12 +28,9 @@ def testGet():
     """
     name = request.args.get('name')
     if name:
-        return 'name = {}'.format(request.args.get('name'))
+        return 'name = {}'.format(escape(request.args.get('name')))
     else:
-        return json.dumps({
-            'msg': 'name为空',
-            'code': '404'
-        }), 404, ''
+        return jsonify(msg='name为空', code='404'), 404
 
 
 @app.route('/account/register/<string:accountnumber>/<string:password>')
