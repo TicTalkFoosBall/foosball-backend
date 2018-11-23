@@ -1,8 +1,7 @@
-from flask import Flask, request, jsonify, make_response, session
-from jinja2 import escape
-from account import Account
 import os
 import redis
+from flask import Flask, request, jsonify, make_response, session
+from jinja2 import escape
 
 
 def after_request(response):
@@ -16,7 +15,6 @@ app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
 app.session_cookie_name = 'encryptCookie'
 app.after_request(after_request)
-accountManager = Account()
 redis = redis.Redis(host='127.0.0.1', port=6379, decode_responses=True)
 
 
@@ -86,6 +84,34 @@ def login():
         return jsonify(msg='登录成功')
     else:
         return jsonify(msg='账号密码不匹配')
+
+
+@app.route('/rank', defaults={'account': 'all'}, methods=['GET'])
+@app.route('/rank/<account>', methods=['GET'])
+def rank(account):
+    def getRankData(fun_account):
+        fun_result = redis.hgetall('account:%s' % fun_account)
+        if fun_result.get('bald_count') is None:
+            fun_result['bald_count'] = 0
+        if fun_result.get('haircut_count') is None:
+            fun_result['haircut_count'] = 0
+        if fun_result.get('score') is None:
+            fun_result['score'] = 0
+        return {
+            'bald_count': fun_result['bald_count'],
+            'haircut_count': fun_result['haircut_count'],
+            'score': fun_result['score'],
+            'account': fun_account
+        }
+
+    if str(account) == str('all'):
+        resultDic = []
+        for item_account in redis.hkeys('account'):
+            resultDic.append(getRankData(item_account))
+            print('account = %s' % item_account)
+        return jsonify(resultDic)
+    else:
+        return jsonify(getRankData(account))
 
 
 if __name__ == '__main__':
