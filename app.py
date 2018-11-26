@@ -1,5 +1,6 @@
 import os
 import redis
+import json
 from flask import Flask, request, jsonify, make_response, session
 from jinja2 import escape
 
@@ -60,8 +61,10 @@ def testCookie():
 
 @app.route('/register', methods=['POST'])
 def register():
-    account = request.form['account']
-    password = request.form['password']
+    data = request.get_data()
+    data_json = json.loads(data)
+    account = data_json['account']
+    password = data_json['password']
     if redis.hexists('account', account):
         return jsonify(msg='注册失败,账号已存在!'), '100'
     else:
@@ -75,8 +78,10 @@ def register():
 
 @app.route('/login', methods=['POST'])
 def login():
-    account = request.form['account']
-    password = request.form['password']
+    data = request.get_data()
+    data_json = json.loads(data)
+    account = data_json['account']
+    password = data_json['password']
     accountFromRedis = redis.hget('account', account)
     if str(password) == str(accountFromRedis):
         session['account'] = account
